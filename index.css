@@ -1,3 +1,5 @@
+/* //TODO Mediaquery for mobile layout */
+
 #root {
   height: 100%;
 }
@@ -14,30 +16,81 @@ html, body {
   overflow: hidden;
 }
 
-.app {
+.App {
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   height: 100%
 }
 
-.input {
+.TopBar {
+  top: 0;
+  height: 56px;
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  background: #425A70;
+  color: #E4E7EB;
+  box-shadow: 0 0 1px rgba(67, 90, 111, .47),
+              0 2px 4px -2px rgba(67, 90, 111, .3);
+  z-index: 9;
+}
+
+.TopBar .Nav-Left {
+  flex-grow: 1;
+}
+
+.TopBar .Link {
+  display: flex;
+  align-items: center;
+  border-radius: 3px;
+  padding: 10px 12px;
+  font-size: 12px;
+  line-height: 16px;
+  box-sizing: border-box;
+  color: inherit;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.TopBar .Link:hover {
+  background: rgba(255, 255, 255, .1)
+}
+
+.TopBar .Link .Icon {
+  height: 16px;
+  width: 16px;
+  position: relative;
+  top: -1px;
+}
+
+.TopBar .Link .Title {
+  margin-left: 8px;
+}
+
+.Content {
+  display: flex;
+  flex-direction: row;
+  height: 100%;
+}
+
+.Search {
   display: flex;
   flex-direction: column;
   width: 20em;
   padding: 5px;
 }
 
-.inputplaces {
+.Search .Places {
   height: 100%;
   margin-bottom: 5px;
   resize: none;
 }
 
-.inputborder {
+.Search .Border {
   width: 100%;
 }
 
-.inputborderlimit {
+.Search .Borderlimit {
   width: 100%;
   margin-bottom: 10px;
 }
@@ -46,12 +99,11 @@ Button {
   justify-content: center;
 }
 
-.content {
+.Map {
   flex-grow: 1;
 }
 
 .leaflet-container {
   height: 100%;
   position: relative;
-  z-index: 1;
 }

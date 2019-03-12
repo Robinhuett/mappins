@@ -1,5 +1,5 @@
 import React from "react";
-import { Map, TileLayer, GeoJSON } from "react-leaflet";
+import { Map, TileLayer, GeoJSON, ZoomControl } from "react-leaflet";
 
 export default class MyMap extends React.Component {
   constructor(props) {
@@ -14,7 +14,6 @@ export default class MyMap extends React.Component {
       return;
     }
 
-    //alert(this.props.geojson["features"].length);
     for (let i = 0; i < this.props.geojson["features"].length; i++) {
       if (this.props.geojson["features"][i]["properties"]["name"] === this.props.firstPlace) {
         return ([
@@ -28,9 +27,10 @@ export default class MyMap extends React.Component {
   render() {
     const position = this.getFirstPoint();
     return (
-      <Map center={position} zoom={this.state.zoom}>
+      <Map center={position} zoom={this.state.zoom} zoomControl={false}>
         <TileLayer attribution="&amp;copy <a href=&quot;http://osm.org/copyright&quot;>OpenStreetMap</a>"
                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+        <ZoomControl position="bottomright" />
         <MarkerThingy geojsonid={this.props.geojsonid} geojson={this.props.geojson} />
       </Map>
     );
@@ -39,7 +39,13 @@ export default class MyMap extends React.Component {
 
 class MarkerThingy extends React.Component {
   showPopup(feature, layer) {
-    layer.bindTooltip(feature["properties"]["name"]);
+    if (feature["properties"]["name"] && feature["properties"]["openGeoDB:loc_id"]) {
+      layer.bindTooltip(feature["properties"]["name"] + ' (' + feature["properties"]["openGeoDB:loc_id"] + ')');
+    } else if (feature["properties"]["name"]) {
+      layer.bindTooltip(feature["properties"]["name"]);
+    }
+
+    //TODO Add Popup
     //layer.bindPopup(feature["geometry"]["coordinates"][0]);
   }
 
