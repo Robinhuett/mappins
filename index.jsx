@@ -204,7 +204,7 @@ class App extends React.Component {
             MapPins
           </div>
           <div className="Nav-Right" >
-            <a className="Link" href="https://https://github.com/Robinhuett/mappins"
+            <a className="Link" href="https://github.com/Robinhuett/mappins"
                target="_blank" rel="noopener noreferrer">
               <span className="Icon"><i className="fab fa-github" /></span>
               <span className="Title">GitHub</span>
