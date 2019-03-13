@@ -11,65 +11,59 @@ class App extends React.Component {
     this.state = {
       places: [
         {
-          id: 0,
+          id: generateUID(),
           name: 'Erfurt',
-          data: null,
-          isValid: false,
-        },
-        {
-          id: 1,
-          name: 'Jena',
-          data: null,
-          isValid: false,
-        },
-        {
-          id: 2,
-          name: 'Bad Langensalza',
-          data: null,
+          features: [],
           isValid: false,
         }
       ],
       border: {
         name: '',
-        data: null,
+        features: [],
         isValid: false,
+        isLimit: false,
       },
       borderlimit: false,
       isLoading: false,
-      geojson: '',
-      geojsonid: 0,
+      updateTrigger: false,
     };
   }
 
-  //TODO Caching
   getGeoData() {
+    const places = this.state.places.filter(place =>
+      !place.isValid &&
+      (place.name && !place.name.includes('[') && !place.name.includes(']'))
+    );
+    const border = this.state.border;
+    let query_limit  = '';
+    let query_border = '';
+    let query_places = '';
+
+    if (border.name) {
+      if (border.isLimit) {
+        query_limit = '(area[name="' + border.name + '"];)->.search;';
+      }
+
+      if (!border.isValid) {
+        query_border = '(rel[name="' + border.name + '"][boundary=administrative];)->.border; \
+                        (way(r.border);)->.border;';
+      }
+    }
+
+    places.some(place => {
+      query_places = query_places + 'node[name="' + place.name + ((query_limit) ? '"](area.search);' : '"];');
+    });
+
+    if (!query_border && !query_places) {
+      return;
+    }
+
     this.setState({isLoading: true});
 
-    let borderquery = '';
-    if (this.state.border.name) {
-      if (this.state.borderlimit) {
-        borderquery = '(area[name="' + this.state.border.name + '"];)->.search;';
-      }
-      borderquery = borderquery + '(rel[name="' + this.state.border.name + '"][boundary=administrative];)->.border; \
-                                   (way(r.border);)->.border;';
-
-    }
-
-    const places = this.state.places.slice();
-    let placesquery = '';
-    for (var i = 0; i < places.length; i++) {
-      if (places[i].name && (!places[i].name.includes('[') || !places[i].name.includes(']'))) {
-        if (borderquery && this.state.borderlimit) {
-          placesquery = placesquery + 'node[name="' + places[i].name + '"](area.search);';
-        } else {
-          placesquery = placesquery + 'node[name="' + places[i].name + '"];';
-        }
-      }
-    }
-
     const query = '[out:json][timeout:60]; \
-                   ' + borderquery + ' \
-                   (' + placesquery + ')->.a; \
+                   ' + query_limit + ' \
+                   ' + query_border + ' \
+                   (' + query_places + ')->.a; \
                    (node.a[place="village"];node.a[place="city"];node.a[place="town"];node.a[place="suburb"];)->.a; \
                    (.a; .border;); \
                    out geom;';
@@ -82,28 +76,88 @@ class App extends React.Component {
   }
 
   handleDataReceived = (error, osmData) => {
-    if (!error && osmData.features !== undefined) {
-      this.setState({
-        geojson: osmData,
-        geojsonid: this.state.geojsonid + 1
-      });
-    } else if (error) {
+    if (error) {
       console.log(error);
+      this.setState({isLoading: false});
+      return;
     }
-    this.setState({isLoading: false});
+
+    if (osmData.features == undefined) {
+      this.setState({isLoading: false});
+      return;
+    }
+
+    let places = this.state.places.slice();
+    places.some(place => {
+      if (!place.isValid) {
+        place.features = osmData.features.filter(osm => osm.properties.name === place.name);
+        place.isValid = true;
+      }
+    });
+
+    let border = this.state.border;
+    if (!border.isValid) {
+      border.features = osmData.features.filter(osm => osm.properties.boundary === 'administrative');
+      border.isValid = true;
+    }
+
+    this.setState({
+      places: places,
+      border: border,
+      isLoading: false,
+      updateTrigger: !this.state.updateTrigger,
+    });
   };
 
   handlePlacesChanged(e) {
-    const places = e.target.value.split('\n');
-    let newPlaces = [];
-    for (var i = 0; i < places.length; i++) {
-      newPlaces[i] = {
-        name: places[i],
-        data: null,
-        isValid: false
+    const placesplain = e.target.value.split('\n');
+    let places = this.state.places.filter(f => e.target.value.split('\n').includes(f.name));
+    for (let i = 0; i < placesplain.length; i++) {
+      if (places.some(f => f.name === placesplain[i])) {
+        continue;
       }
+
+      places.push({
+        id: generateUID(),
+        name: placesplain[i],
+        features: [],
+        isValid: false
+      });
     }
-    this.setState({places: newPlaces});
+
+    this.setState({places: places});
+  }
+
+  handleBorderChanged(e) {
+    let places = this.state.places.slice();
+    if (this.state.border.isLimit) {
+      places.some(f => f.isValid = false);
+    }
+    this.setState({
+      places: places,
+      border: {
+        name: e.target.value,
+        features: [],
+        isValid: false,
+        isLimit: this.state.border.isLimit
+      }
+    });
+  }
+
+  //TODO Revalidate if limit is toggled in sucsession? Maybe in getData
+  handleBorderlimitChanged(e) {
+    let places = this.state.places.slice();
+    places.some(f => f.isValid = false);
+
+    this.setState({
+      places: places,
+      border: {
+        name: this.state.border.name,
+        features: this.state.border.features,
+        isValid: this.state.border.isValid,
+        isLimit: e.target.checked
+      }
+    });
   }
 
   componentDidMount() {
@@ -119,11 +173,12 @@ class App extends React.Component {
   }
 
   render() {
-    const placesRaw = this.state.places.slice();
     let places = [];
-    for (var i = 0; i < placesRaw.length; i++) {
-      places[i] = placesRaw[i].name;
-    }
+    let geoData = {features: this.state.border.features, type: "FeatureCollection"};
+    this.state.places.some(place => {
+      geoData.features = geoData.features.concat(place.features);
+      places.push(place.name);
+    });
     const textvalue = places.join('\n');
 
     //TODO Replace Textarea with a custom element to satisfy the next two Todos
@@ -150,11 +205,11 @@ class App extends React.Component {
                       value={textvalue} onChange={(e) => this.handlePlacesChanged(e)}
                       placeholder="Enter one place per row" wrap="off" />
             <TextInput className="Border"
-                      value={this.state.border.name} onChange={(e) => this.setState({border: {name: e.target.value, data: null, isValid: false}})}
+                      value={this.state.border.name} onChange={(e) => this.handleBorderChanged(e)}
                       placeholder="Enter border (optional)"
                       width="100%" />
             <Checkbox className="Borderlimit"
-                      checked={this.state.borderlimit} onChange={(e) => this.setState({borderlimit: e.target.checked})}
+                      checked={this.state.border.isLimit} onChange={(e) => this.handleBorderlimitChanged(e)}
                       label="Limit search to area" />
             <Button appearance="minimal" height={48} iconBefore="search"
                     isLoading={this.state.isLoading}
@@ -164,12 +219,20 @@ class App extends React.Component {
             </Button>
           </div>
           <div className="Map">
-            <MapThingy firstPlace={this.state.places[0].name} geojsonid={this.state.geojsonid} geojson={this.state.geojson} />
+            <MapThingy firstPlace={this.state.places[0].name} updateTrigger={this.state.updateTrigger} geoData={geoData} />
           </div>
         </div>
       </div>
     );
   }
+}
+
+function generateUID() {
+  let fp = (Math.random() * 46656) | 0;
+  let sp = (Math.random() * 46656) | 0;
+  fp = ("000" + fp.toString(36)).slice(-3);
+  sp = ("000" + sp.toString(36)).slice(-3);
+  return fp + sp;
 }
 
 ReactDOM.render(<App />, document.getElementById('root'));

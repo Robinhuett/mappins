@@ -10,15 +10,15 @@ export default class MyMap extends React.Component {
   }
 
   getFirstPoint() {
-    if (!this.props.geojson || !this.props.firstPlace) {
+    if (!this.props.geoData || !this.props.firstPlace) {
       return;
     }
 
-    for (let i = 0; i < this.props.geojson["features"].length; i++) {
-      if (this.props.geojson["features"][i]["properties"]["name"] === this.props.firstPlace) {
+    for (let i = 0; i < this.props.geoData["features"].length; i++) {
+      if (this.props.geoData["features"][i]["properties"]["name"] === this.props.firstPlace) {
         return ([
-          this.props.geojson["features"][i]["geometry"]["coordinates"][1],
-          this.props.geojson["features"][i]["geometry"]["coordinates"][0]
+          this.props.geoData["features"][i]["geometry"]["coordinates"][1],
+          this.props.geoData["features"][i]["geometry"]["coordinates"][0]
         ]);
       }
     }
@@ -31,7 +31,7 @@ export default class MyMap extends React.Component {
         <TileLayer attribution="&amp;copy <a href=&quot;http://osm.org/copyright&quot;>OpenStreetMap</a>"
                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
         <ZoomControl position="bottomright" />
-        <MarkerThingy geojsonid={this.props.geojsonid} geojson={this.props.geojson} />
+        <MarkerThingy updateTrigger={this.props.updateTrigger} geoData={this.props.geoData} />
       </Map>
     );
 }
@@ -39,8 +39,8 @@ export default class MyMap extends React.Component {
 
 class MarkerThingy extends React.Component {
   showPopup(feature, layer) {
-    if (feature["properties"]["name"] && feature["properties"]["openGeoDB:loc_id"]) {
-      layer.bindTooltip(feature["properties"]["name"] + ' (' + feature["properties"]["openGeoDB:loc_id"] + ')');
+    if (feature["properties"]["name"] && feature["properties"]["postal_code"]) {
+      layer.bindTooltip(feature["properties"]["name"] + ' (' + feature["properties"]["postal_code"] + ')');
     } else if (feature["properties"]["name"]) {
       layer.bindTooltip(feature["properties"]["name"]);
     }
@@ -50,8 +50,8 @@ class MarkerThingy extends React.Component {
   }
 
   render() {
-    return this.props.geojson ? <GeoJSON key={this.props.geojsonid}
-                                         data={this.props.geojson}
+    return this.props.geoData ? <GeoJSON key={this.props.updateTrigger}
+                                         data={this.props.geoData}
                                          onEachFeature={(feature, layer) => this.showPopup(feature, layer)} /> : null;
   }
 }
