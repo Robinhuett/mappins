@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Button, Textarea, TextInput, Checkbox } from 'evergreen-ui';
+import { Button, Textarea, TextInput, Checkbox, Pane } from 'evergreen-ui';
 import query_overpass from 'query-overpass';
 import MapThingy from './MapThingy';
 import './index.css';
@@ -144,6 +144,13 @@ class App extends React.Component {
     });
   }
 
+  handleSearchRequested() {
+    if (window.innerWidth < 800) {
+      toggleSidebar();
+    }
+    this.getGeoData();
+  }
+
   //TODO Revalidate if limit is toggled in sucsession? Maybe in getData
   handleBorderlimitChanged(e) {
     let places = this.state.places.slice();
@@ -186,10 +193,11 @@ class App extends React.Component {
     //TODO Mark places which already exist in list
     return (
       <div className="App">
-        <div className="TopBar">
+        <Pane className="TopBar"
+              elevation={1}>
           <a className="Menu" onClick={() => toggleSidebar()}>
             <span className="Icon">
-              <div className="Open"><i className="far fa-bars" /></div>
+              <i className="far fa-bars" />
             </span>
           </a>
           <div className="Nav-Left" >
@@ -202,9 +210,10 @@ class App extends React.Component {
               <span className="Title">GitHub</span>
             </a>
           </div>
-        </div>
+        </Pane>
         <div className="Content">
-          <div className="Search is-visible">
+          <Pane className="Search is-visible"
+                elevation={1}>
             <Textarea className="Places"
                       value={textvalue} onChange={(e) => this.handlePlacesChanged(e)}
                       placeholder="Enter one place per row" wrap="off" />
@@ -218,10 +227,11 @@ class App extends React.Component {
             <Button appearance="minimal" height={48} iconBefore="search"
                     isLoading={this.state.isLoading}
                     margin={-5}
-                    onClick={() => this.getGeoData()}>
+                    onClick={() => this.handleSearchRequested()}>
               Search
             </Button>
-          </div>
+          </Pane>
+          <div className="Placeholder"></div>
           <div className="Map">
             <MapThingy firstPlace={this.state.places[0].name} updateTrigger={this.state.updateTrigger} geoData={geoData} />
           </div>

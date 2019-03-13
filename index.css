@@ -28,8 +28,6 @@ html, body {
   align-items: center;
   background: #425A70;
   color: rgba(228, 231, 235, 1);
-  box-shadow: 0 0 1px rgba(67, 90, 111, .47),
-              0 2px 4px -2px rgba(67, 90, 111, .3);
   z-index: 9;
 }
 
@@ -41,16 +39,20 @@ html, body {
   display: flex;
   align-items: center;
   border-radius: 3px;
-  padding-right: 20px;
+  margin-left: -16px;
+  margin-right: 10px;
+  padding: 19px;
   line-height: 16px;
   box-sizing: border-box;
   color: inherit;
   text-decoration: none;
   text-transform: uppercase;
+  background: #425A70
 }
 
 .TopBar .Menu:hover {
   color: rgba(228, 231, 235, 0.8);
+  background: rgba(255, 255, 255, .1)
 }
 
 .TopBar .Menu .Icon {
@@ -89,10 +91,6 @@ html, body {
   margin-left: 8px;
 }
 
-.Search.is-visible  ~ .Map {
-  flex-basis: 0;
-}
-
 .Content {
   display: flex;
   justify-content: flex-end;
@@ -103,16 +101,21 @@ html, body {
 .Search {
   display: flex;
   flex-direction: column;
-  width: 20em;
+  width: 400px;
+  height: 100%;
   padding: 5px;
+  z-index: 2;
 
-  background: rgba(228, 231, 235, 0.9);
+  background: rgba(228, 231, 235, 0.8);
 
   flex-grow: 0;
   flex-shrink: 0;
   flex-basis: auto;
+}
 
-  height: 99%;
+.Search.is-visible ~ .Placeholder {
+  flex-basis: 0;
+  transition: flex-basis .3s cubic-bezier(.465, .183, .153, .946);
 }
 
 .Search .Places {
@@ -135,10 +138,24 @@ Button {
   padding-bottom: 20px;
 }
 
-.Map {
+.Placeholder {
+  background: rgba(228, 0, 0, 0.9);
   flex-grow: 1;
   flex-shrink: 0;
   flex-basis: 100%;
+
+  transition: flex-basis .3s cubic-bezier(.465, .183, .153, .946);
+  will-change: flex-basis;
+}
+
+.Map {
+  display: block;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  z-index: 1;
 }
 
 .leaflet-container {
@@ -146,18 +163,18 @@ Button {
   position: relative;
 }
 
-@media only screen and (min-width: 50em) {
+@media only screen and (min-width: 1000px) {
   .TopBar .Menu {
     display: none;
   }
+
+  .Placeholder {
+    flex-basis: 0;
+  }
 }
 
-/* Animation */
-.Map {
-  transition: flex-basis .3s cubic-bezier(.465, .183, .153, .946);
-  will-change: flex-basis;
-}
-
-.Search.is-visible ~ .content {
-  transition: flex-basis .3s cubic-bezier(.465, .183, .153, .946);
+@media only screen and (max-width: 500px) {
+  .Search {
+    width: 100%;
+  }
 }
