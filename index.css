@@ -1,5 +1,3 @@
-/* //TODO Mediaquery for mobile layout */
-
 #root {
   height: 100%;
 }
@@ -29,7 +27,7 @@ html, body {
   display: flex;
   align-items: center;
   background: #425A70;
-  color: #E4E7EB;
+  color: rgba(228, 231, 235, 1);
   box-shadow: 0 0 1px rgba(67, 90, 111, .47),
               0 2px 4px -2px rgba(67, 90, 111, .3);
   z-index: 9;
@@ -37,6 +35,29 @@ html, body {
 
 .TopBar .Nav-Left {
   flex-grow: 1;
+}
+
+.TopBar .Menu {
+  display: flex;
+  align-items: center;
+  border-radius: 3px;
+  padding-right: 20px;
+  line-height: 16px;
+  box-sizing: border-box;
+  color: inherit;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.TopBar .Menu:hover {
+  color: rgba(228, 231, 235, 0.8);
+}
+
+.TopBar .Menu .Icon {
+  height: 16px;
+  width: 16px;
+  position: relative;
+  top: -1px;
 }
 
 .TopBar .Link {
@@ -59,6 +80,7 @@ html, body {
 .TopBar .Link .Icon {
   height: 16px;
   width: 16px;
+  font-size: 16px;
   position: relative;
   top: -1px;
 }
@@ -67,10 +89,15 @@ html, body {
   margin-left: 8px;
 }
 
+.Search.is-visible  ~ .Map {
+  flex-basis: 0;
+}
+
 .Content {
   display: flex;
-  flex-direction: row;
+  justify-content: flex-end;
   height: 100%;
+  background: #425A70;
 }
 
 .Search {
@@ -78,10 +105,18 @@ html, body {
   flex-direction: column;
   width: 20em;
   padding: 5px;
+
+  background: rgba(228, 231, 235, 0.9);
+
+  flex-grow: 0;
+  flex-shrink: 0;
+  flex-basis: auto;
+
+  height: 99%;
 }
 
 .Search .Places {
-  height: 100%;
+  flex-grow: 1;
   margin-bottom: 5px;
   resize: none;
 }
@@ -97,13 +132,32 @@ html, body {
 
 Button {
   justify-content: center;
+  padding-bottom: 20px;
 }
 
 .Map {
   flex-grow: 1;
+  flex-shrink: 0;
+  flex-basis: 100%;
 }
 
 .leaflet-container {
   height: 100%;
   position: relative;
+}
+
+@media only screen and (min-width: 50em) {
+  .TopBar .Menu {
+    display: none;
+  }
+}
+
+/* Animation */
+.Map {
+  transition: flex-basis .3s cubic-bezier(.465, .183, .153, .946);
+  will-change: flex-basis;
+}
+
+.Search.is-visible ~ .content {
+  transition: flex-basis .3s cubic-bezier(.465, .183, .153, .946);
 }
