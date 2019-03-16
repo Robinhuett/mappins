@@ -41,17 +41,17 @@ class App extends React.Component {
 
     if (border.name) {
       if (border.isLimit) {
-        query_limit = '(area[name="' + border.name + '"];)->.search;';
+        query_limit = '(area[name="' + border.name.trim() + '"];)->.search;';
       }
 
       if (!border.isValid) {
-        query_border = '(rel[name="' + border.name + '"][boundary=administrative];)->.border; \
+        query_border = '(rel[name="' + border.name.trim() + '"][boundary=administrative];)->.border; \
                         (way(r.border);)->.border;';
       }
     }
 
     places.some(place => {
-      query_places = query_places + 'node[name="' + place.name + ((query_limit) ? '"](area.search);' : '"];');
+      query_places = query_places + 'node[name="' + place.name.trim() + ((query_limit) ? '"](area.search);' : '"];');
     });
 
     if (!query_border && !query_places) {
@@ -90,7 +90,7 @@ class App extends React.Component {
     let places = this.state.places.slice();
     places.some(place => {
       if (!place.isValid) {
-        place.features = osmData.features.filter(osm => osm.properties.name === place.name);
+        place.features = osmData.features.filter(osm => osm.properties.name.trim() === place.name.trim());
         place.isValid = true;
       }
     });
@@ -194,13 +194,16 @@ class App extends React.Component {
     return (
       <div className="App">
         <Pane className="TopBar"
-              elevation={1}>
+          elevation={1}>
           <a className="Menu" onClick={() => toggleSidebar()}>
             <span className="Icon">
               <i className="far fa-bars" />
             </span>
           </a>
-          <div className="Nav-Left" >
+          <div className="Name">
+            <span className="Icon">
+              <i className="far fa-map-marker-alt" />
+            </span>
             MapPins
           </div>
           <div className="Nav-Right" >

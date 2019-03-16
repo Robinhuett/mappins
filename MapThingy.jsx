@@ -1,7 +1,7 @@
 import React from "react";
 import { Map, TileLayer, GeoJSON, ZoomControl } from "react-leaflet";
 
-export default class MyMap extends React.Component {
+export default class MapThingy extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -34,7 +34,7 @@ export default class MyMap extends React.Component {
         <MarkerThingy updateTrigger={this.props.updateTrigger} geoData={this.props.geoData} />
       </Map>
     );
-}
+  }
 }
 
 class MarkerThingy extends React.Component {
@@ -44,9 +44,6 @@ class MarkerThingy extends React.Component {
     } else if (feature["properties"]["name"]) {
       layer.bindTooltip(feature["properties"]["name"]);
     }
-
-    //TODO Add Popup
-    //layer.bindPopup(feature["geometry"]["coordinates"][0]);
   }
 
   render() {
